@@ -1,50 +1,595 @@
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>DNI</title>
-        <link rel="icon" type="image/png" href="img/favicon.png">
-        <link rel="stylesheet" href="styles.css">
-    </head>
-    <body>
-       <div>
-        <div>
-           <h1>DOCUMENTO NACIONAL DE IDENTIDAD</h1> 
-           <p><span>REPUBLICA ARGENTINA - MERCOSUR</span></p>
-           <p>Registro Nacional de las personas</p>
-           <p>Ministerio del interior</p>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analizador de DNI Argentino</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            color: #333;
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4CAF50;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.2);
+        }
+
+        .btn-visualizar {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+            display: block;
+            margin: 30px auto 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-visualizar:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn-visualizar:active {
+            transform: translateY(-1px);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            position: relative;
+            margin: 2% auto;
+            width: 90%;
+            max-width: 600px;
+            background: linear-gradient(145deg, #f0f8ff, #e6f3ff);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            overflow: hidden;
+            animation: modalSlideIn 0.4s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            font-size: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #666;
+            z-index: 1001;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.8);
+            transition: all 0.3s ease;
+        }
+
+        .close:hover {
+            background: rgba(255,0,0,0.1);
+            color: #ff0000;
+            transform: scale(1.1);
+        }
+
+        .dni-card {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dni-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .dni-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .dni-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .dni-subtitle {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .dni-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .dni-section h3 {
+            color: #ffeb3b;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .dni-field {
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .dni-field strong {
+            color: #fff;
+        }
+
+        .dni-number {
+            font-size: 2rem;
+            font-weight: bold;
+            text-align: center;
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            grid-column: 1 / -1;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+            }
+            
+            .dni-body {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 5% auto;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+
+        .required {
+            color: #ff4444;
+        }
+
+        .argentina-flag {
+            background: linear-gradient(to bottom, #74acdf 33%, white 33%, white 66%, #74acdf 66%);
+            height: 10px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🇦🇷 Analizador de DNI Argentino</h1>
+            <p>Ingresa los datos del Documento Nacional de Identidad</p>
         </div>
-        <div>
-            <img src="#" alt="#">
-        </div>
-        <div>
-            <form action="">
-                <label for="">Apellido/Surname</label>
-                <input type="text" required>
 
-                <label for="">Nombre/Name</label>
-                <input type="text" required>
+        <div class="form-container">
+            <form id="dniForm">
+                <div class="form-section">
+                    <h2 class="section-title"> Datos Personales</h2>
+                    
+                    <div class="form-row">
+                        <div class="form-group" style="flex: 2;">
+                            <label for="nombre">Nombre <span class="required">*</span></label>
+                            <input type="text" id="nombre" name="nombre" required>
+                        </div>
+                        <div class="form-group" style="flex: 2;">
+                            <label for="apellido">Apellido <span class="required">*</span></label>
+                            <input type="text" id="apellido" name="apellido" required>
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label for="sexo">Sexo <span class="required">*</span></label>
+                            <select id="sexo" name="sexo" required>
+                                <option value="">Seleccionar</option>
+                                <option value="M">Masculino</option>
+                                <option value="F">Femenino</option>
+                                <option value="X">No binario</option>
+                            </select>
+                        </div>
+                    </div>
 
-                <label for="">Sexo/Sex</label>
-                <input type="text" required>
+                    <div class="form-row">
+                        <div class="form-group" style="flex: 2;">
+                            <label for="numeroDocumento">Número de Documento <span class="required">*</span></label>
+                            <input type="text" id="numeroDocumento" name="numeroDocumento" placeholder="ej: 23.456.789" required>
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label for="ejemplar">Ejemplar</label>
+                            <input type="text" id="ejemplar" name="ejemplar" placeholder="ej: A" maxlength="1">
+                        </div>
+                        <div class="form-group" style="flex: 2;">
+                            <label for="fechaNacimiento">Fecha de Nacimiento <span class="required">*</span></label>
+                            <input type="date" id="fechaNacimiento" name="fechaNacimiento" required>
+                        </div>
+                    </div>
 
-                <label for="">Nacionalidad/Nationality</label>
-                <input type="text" required>
+                    <div class="form-group">
+                        <label for="lugarNacimiento">Lugar de Nacimiento</label>
+                        <input type="text" id="lugarNacimiento" name="lugarNacimiento" placeholder="ej: Buenos Aires, Argentina">
+                    </div>
+                </div>
 
-                <label for="">Fecha de emision/Date of issue</label>
-                <input type="date" required>
+                <div class="form-section">
+                    <h2 class="section-title"> Datos de Emisión</h2>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fechaEmision">Fecha de Emisión <span class="required">*</span></label>
+                            <input type="date" id="fechaEmision" name="fechaEmision" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="fechaVencimiento">Fecha de Vencimiento</label>
+                            <input type="date" id="fechaVencimiento" name="fechaVencimiento">
+                        </div>
+                    </div>
 
-                <label for="">Fecha de vencimiento / Date of expiry</label>
-                <input type="date" required>
+                    <div class="form-group">
+                        <label for="numeroTramite">Número de Trámite</label>
+                        <input type="text" id="numeroTramite" name="numeroTramite" placeholder="ej: 1234 5678 9012">
+                    </div>
+                </div>
 
-                <label for="">Tramite N / Of. ident.</label>
-                <input type="number" required>
+                <div class="form-section">
+                    <h2 class="section-title"> Datos Adicionales</h2>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nacionalidad">Nacionalidad</label>
+                            <input type="text" id="nacionalidad" name="nacionalidad" value="Argentina">
+                        </div>
+                        <div class="form-group">
+                            <label for="estadoCivil">Estado Civil</label>
+                            <select id="estadoCivil" name="estadoCivil">
+                                <option value="">Seleccionar</option>
+                                <option value="Soltero/a">Soltero/a</option>
+                                <option value="Casado/a">Casado/a</option>
+                                <option value="Divorciado/a">Divorciado/a</option>
+                                <option value="Viudo/a">Viudo/a</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
 
-                <label for="">Documento/Document</label>
-                <input type="number" required>
+                <button type="submit" class="btn-visualizar">✨ Visualizar DNI</button>
             </form>
         </div>
-       </div>
-    </body>
+    </div>
+
+    <!-- Modal -->
+    <div id="dniModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div class="argentina-flag"></div>
+            <div class="dni-card">
+                <div class="dni-header">
+                    <div class="dni-title">DOCUMENTO NACIONAL DE IDENTIDAD</div>
+                    <div class="dni-subtitle">REPÚBLICA ARGENTINA</div>
+                </div>
+                
+                <div class="dni-number" id="modalNumeroDocumento">
+                    <!-- Número de documento se insertará aquí -->
+                </div>
+                
+                <div class="dni-body">
+                    <div class="dni-section">
+                        <h3>DATOS PERSONALES</h3>
+                        <div class="dni-field">
+                            <strong>Nombre:</strong> <span id="modalNombre"></span>
+                        </div>
+                        <div class="dni-field">
+                            <strong>Apellido:</strong> <span id="modalApellido"></span>
+                        </div>
+                        <div class="dni-field">
+                            <strong>Sexo:</strong> <span id="modalSexo"></span>
+                        </div>
+                        <div class="dni-field">
+                            <strong>F. Nacimiento:</strong> <span id="modalFechaNacimiento"></span>
+                        </div>
+                        <div class="dni-field">
+                            <strong>Nacionalidad:</strong> <span id="modalNacionalidad"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="dni-section">
+                        <h3>DATOS DEL DOCUMENTO</h3>
+                        <div class="dni-field">
+                            <strong>Ejemplar:</strong> <span id="modalEjemplar"></span>
+                        </div>
+                        <div class="dni-field">
+                            <strong>F. Emisión:</strong> <span id="modalFechaEmision"></span>
+                        </div>
+                        <div class="dni-field">
+                            <strong>F. Vencimiento:</strong> <span id="modalFechaVencimiento"></span>
+                        </div>
+                        <div class="dni-field">
+                            <strong>Nº Trámite:</strong> <span id="modalNumeroTramite"></span>
+                        </div>
+                        <div class="dni-field">
+                            <strong>Lugar Nac.:</strong> <span id="modalLugarNacimiento"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Referencias a elementos del DOM
+        const form = document.getElementById('dniForm');
+        const modal = document.getElementById('dniModal');
+        const closeModal = document.querySelector('.close');
+
+        // Función para formatear fecha
+        function formatearFecha(fecha) {
+            if (!fecha) return 'No especificada';
+            const fechaObj = new Date(fecha);
+            return fechaObj.toLocaleDateString('es-AR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        }
+
+        // Función para formatear sexo
+        function formatearSexo(sexo) {
+            const sexos = {
+                'M': 'Masculino',
+                'F': 'Femenino',
+                'X': 'No binario'
+            };
+            return sexos[sexo] || sexo;
+        }
+
+        // Función para validar y formatear número de documento
+        function formatearNumeroDocumento(numero) {
+            // Remover puntos y espacios existentes
+            const numeroLimpio = numero.replace(/[^\d]/g, '');
+            
+            // Formatear con puntos
+            if (numeroLimpio.length >= 7) {
+                return numeroLimpio.replace(/(\d{2})(\d{3})(\d{3})/, '$1.$2.$3');
+            }
+            return numeroLimpio;
+        }
+
+        // Validación y formateo en tiempo real del número de documento
+        document.getElementById('numeroDocumento').addEventListener('input', function(e) {
+            const valor = e.target.value;
+            const valorFormateado = formatearNumeroDocumento(valor);
+            if (valorFormateado !== valor) {
+                e.target.value = valorFormateado;
+            }
+        });
+
+        // Función para cargar datos de ejemplo
+        function cargarDatosEjemplo() {
+            document.getElementById('nombre').value = 'Juan';
+            document.getElementById('apellido').value = 'Pérez';
+            document.getElementById('sexo').value = 'M';
+            document.getElementById('numeroDocumento').value = '23.456.789';
+            document.getElementById('ejemplar').value = 'A';
+            document.getElementById('fechaNacimiento').value = '1990-04-15';
+            document.getElementById('lugarNacimiento').value = 'Buenos Aires, Argentina';
+            document.getElementById('fechaEmision').value = '2020-02-10';
+            document.getElementById('fechaVencimiento').value = '2030-02-10';
+            document.getElementById('numeroTramite').value = '1234 5678 9012';
+            document.getElementById('nacionalidad').value = 'Argentina';
+            document.getElementById('estadoCivil').value = 'Soltero/a';
+        }
+
+        // Cargar datos de ejemplo al cargar la página
+        window.addEventListener('load', cargarDatosEjemplo);
+
+        // Manejar envío del formulario
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Obtener valores del formulario
+            const formData = new FormData(form);
+            const datos = Object.fromEntries(formData.entries());
+
+            // Validar campos requeridos
+            const camposRequeridos = ['nombre', 'apellido', 'sexo', 'numeroDocumento', 'fechaNacimiento', 'fechaEmision'];
+            const camposFaltantes = camposRequeridos.filter(campo => !datos[campo]);
+
+            if (camposFaltantes.length > 0) {
+                alert('Por favor completa todos los campos obligatorios marcados con *');
+                return;
+            }
+
+            // Llenar el modal con los datos
+            document.getElementById('modalNumeroDocumento').textContent = datos.numeroDocumento;
+            document.getElementById('modalNombre').textContent = datos.nombre;
+            document.getElementById('modalApellido').textContent = datos.apellido;
+            document.getElementById('modalSexo').textContent = formatearSexo(datos.sexo);
+            document.getElementById('modalFechaNacimiento').textContent = formatearFecha(datos.fechaNacimiento);
+            document.getElementById('modalNacionalidad').textContent = datos.nacionalidad || 'Argentina';
+            document.getElementById('modalEjemplar').textContent = datos.ejemplar || 'N/A';
+            document.getElementById('modalFechaEmision').textContent = formatearFecha(datos.fechaEmision);
+            document.getElementById('modalFechaVencimiento').textContent = formatearFecha(datos.fechaVencimiento);
+            document.getElementById('modalNumeroTramite').textContent = datos.numeroTramite || 'No especificado';
+            document.getElementById('modalLugarNacimiento').textContent = datos.lugarNacimiento || 'No especificado';
+
+            // Mostrar el modal
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        });
+
+        // Cerrar modal
+        closeModal.addEventListener('click', function() {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        });
+
+        // Cerrar modal al hacer clic fuera de él
+        window.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        });
+
+        // Cerrar modal con tecla Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && modal.style.display === 'block') {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        });
+
+        // Calcular edad automáticamente
+        document.getElementById('fechaNacimiento').addEventListener('change', function(e) {
+            const fechaNacimiento = new Date(e.target.value);
+            const hoy = new Date();
+            const edad = hoy.getFullYear() - fechaNacimiento.getFullYear();
+            
+            // Opcional: mostrar edad calculada
+            console.log('Edad calculada:', edad, 'años');
+        });
+
+        // Validar que la fecha de vencimiento sea posterior a la emisión
+        document.getElementById('fechaVencimiento').addEventListener('change', function(e) {
+            const fechaEmision = document.getElementById('fechaEmision').value;
+            const fechaVencimiento = e.target.value;
+            
+            if (fechaEmision && fechaVencimiento && new Date(fechaVencimiento) <= new Date(fechaEmision)) {
+                alert('La fecha de vencimiento debe ser posterior a la fecha de emisión');
+                e.target.value = '';
+            }
+        });
+    </script>
+</body>
 </html>
