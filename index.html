@@ -89,6 +89,17 @@
             transition: all 0.3s ease;
         }
 
+        .form-group input[type="file"] {
+            padding: 8px;
+            background: #f9f9f9;
+            border: 2px dashed #ddd;
+        }
+
+        .form-group small {
+            display: block;
+            margin-top: 5px;
+        }
+
         .form-group input:focus,
         .form-group select:focus {
             outline: none;
@@ -226,8 +237,87 @@
 
         .dni-body {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 150px 1fr;
+            grid-template-rows: auto auto;
             gap: 20px;
+            grid-template-areas: 
+                "photo info"
+                "signature signature";
+        }
+
+        .dni-photo-section {
+            grid-area: photo;
+        }
+
+        .dni-info-section {
+            grid-area: info;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .dni-signature-section {
+            grid-area: signature;
+            margin-top: 10px;
+        }
+
+        .dni-photo-container {
+            width: 150px;
+            height: 200px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .dni-photo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255,255,255,0.7);
+            font-size: 0.8rem;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .signature-container {
+            background: rgba(255,255,255,0.2);
+            border-radius: 8px;
+            padding: 15px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .signature-container img {
+            max-height: 50px;
+            max-width: 100%;
+            object-fit: contain;
+        }
+
+        .signature-text {
+            font-family: cursive;
+            font-size: 1.2rem;
+            color: white;
+            text-align: center;
+        }
+
+        .signature-placeholder {
+            color: rgba(255,255,255,0.6);
+            font-style: italic;
+            text-align: center;
         }
 
         .dni-section h3 {
@@ -265,6 +355,14 @@
             
             .dni-body {
                 grid-template-columns: 1fr;
+                grid-template-areas: 
+                    "photo"
+                    "info"
+                    "signature";
+            }
+            
+            .dni-photo-container {
+                margin: 0 auto;
             }
             
             .modal-content {
@@ -383,7 +481,31 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn-visualizar">✨ Visualizar DNI</button>
+                <div class="form-section">
+                    <h2 class="section-title"> Identificación</h2>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="foto">Fotografía (150x200px)</label>
+                            <input type="file" id="foto" name="foto" accept="image/*">
+                            <small style="color: #666; font-size: 0.85rem;">Formato recomendado: JPG/PNG - 150x200 píxeles</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="firma">Firma Digital</label>
+                            <input type="file" id="firma" name="firma" accept="image/*">
+                            <small style="color: #666; font-size: 0.85rem;">Imagen de la firma en formato JPG/PNG</small>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="firmaTexto">Firma (Texto)</label>
+                            <input type="text" id="firmaTexto" name="firmaTexto" placeholder="Nombre y apellido como aparece en la firma" style="font-family: cursive;">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-visualizar"> Visualizar DNI</button>
             </form>
         </div>
     </div>
@@ -404,41 +526,63 @@
                 </div>
                 
                 <div class="dni-body">
-                    <div class="dni-section">
-                        <h3>DATOS PERSONALES</h3>
-                        <div class="dni-field">
-                            <strong>Nombre:</strong> <span id="modalNombre"></span>
-                        </div>
-                        <div class="dni-field">
-                            <strong>Apellido:</strong> <span id="modalApellido"></span>
-                        </div>
-                        <div class="dni-field">
-                            <strong>Sexo:</strong> <span id="modalSexo"></span>
-                        </div>
-                        <div class="dni-field">
-                            <strong>F. Nacimiento:</strong> <span id="modalFechaNacimiento"></span>
-                        </div>
-                        <div class="dni-field">
-                            <strong>Nacionalidad:</strong> <span id="modalNacionalidad"></span>
+                    <div class="dni-photo-section">
+                        <div class="dni-photo-container">
+                            <img id="modalFoto" src="" alt="Fotografía" style="display: none;">
+                            <div id="photoPlaceholder" class="photo-placeholder">
+                                📷<br>FOTO<br>150x200
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="dni-section">
-                        <h3>DATOS DEL DOCUMENTO</h3>
-                        <div class="dni-field">
-                            <strong>Ejemplar:</strong> <span id="modalEjemplar"></span>
+                    <div class="dni-info-section">
+                        <div class="dni-section">
+                            <h3>👤 DATOS PERSONALES</h3>
+                            <div class="dni-field">
+                                <strong>Nombre:</strong> <span id="modalNombre"></span>
+                            </div>
+                            <div class="dni-field">
+                                <strong>Apellido:</strong> <span id="modalApellido"></span>
+                            </div>
+                            <div class="dni-field">
+                                <strong>Sexo:</strong> <span id="modalSexo"></span>
+                            </div>
+                            <div class="dni-field">
+                                <strong>F. Nacimiento:</strong> <span id="modalFechaNacimiento"></span>
+                            </div>
+                            <div class="dni-field">
+                                <strong>Nacionalidad:</strong> <span id="modalNacionalidad"></span>
+                            </div>
                         </div>
-                        <div class="dni-field">
-                            <strong>F. Emisión:</strong> <span id="modalFechaEmision"></span>
+                        
+                        <div class="dni-section">
+                            <h3>📋 DATOS DEL DOCUMENTO</h3>
+                            <div class="dni-field">
+                                <strong>Ejemplar:</strong> <span id="modalEjemplar"></span>
+                            </div>
+                            <div class="dni-field">
+                                <strong>F. Emisión:</strong> <span id="modalFechaEmision"></span>
+                            </div>
+                            <div class="dni-field">
+                                <strong>F. Vencimiento:</strong> <span id="modalFechaVencimiento"></span>
+                            </div>
+                            <div class="dni-field">
+                                <strong>Nº Trámite:</strong> <span id="modalNumeroTramite"></span>
+                            </div>
+                            <div class="dni-field">
+                                <strong>Lugar Nac.:</strong> <span id="modalLugarNacimiento"></span>
+                            </div>
                         </div>
-                        <div class="dni-field">
-                            <strong>F. Vencimiento:</strong> <span id="modalFechaVencimiento"></span>
-                        </div>
-                        <div class="dni-field">
-                            <strong>Nº Trámite:</strong> <span id="modalNumeroTramite"></span>
-                        </div>
-                        <div class="dni-field">
-                            <strong>Lugar Nac.:</strong> <span id="modalLugarNacimiento"></span>
+                    </div>
+                    
+                    <div class="dni-signature-section">
+                        <h3>✍️ FIRMA</h3>
+                        <div class="signature-container">
+                            <img id="modalFirmaImagen" src="" alt="Firma" style="display: none;">
+                            <div id="modalFirmaTexto" class="signature-text"></div>
+                            <div id="signaturePlaceholder" class="signature-placeholder">
+                                ✍️ Firma del titular
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -508,7 +652,40 @@
             document.getElementById('numeroTramite').value = '1234 5678 9012';
             document.getElementById('nacionalidad').value = 'Argentina';
             document.getElementById('estadoCivil').value = 'Soltero/a';
+            document.getElementById('firmaTexto').value = 'Juan Pérez';
         }
+
+        // Variables para almacenar las imágenes cargadas
+        let fotoFile = null;
+        let firmaFile = null;
+
+        // Manejar carga de foto
+        document.getElementById('foto').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                fotoFile = file;
+                // Opcional: mostrar preview de la foto
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    console.log('Foto cargada correctamente');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Manejar carga de firma
+        document.getElementById('firma').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                firmaFile = file;
+                // Opcional: mostrar preview de la firma
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    console.log('Firma cargada correctamente');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
 
         // Cargar datos de ejemplo al cargar la página
         window.addEventListener('load', cargarDatosEjemplo);
@@ -542,6 +719,48 @@
             document.getElementById('modalFechaVencimiento').textContent = formatearFecha(datos.fechaVencimiento);
             document.getElementById('modalNumeroTramite').textContent = datos.numeroTramite || 'No especificado';
             document.getElementById('modalLugarNacimiento').textContent = datos.lugarNacimiento || 'No especificado';
+
+            // Manejar la foto
+            const modalFoto = document.getElementById('modalFoto');
+            const photoPlaceholder = document.getElementById('photoPlaceholder');
+            
+            if (fotoFile) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    modalFoto.src = e.target.result;
+                    modalFoto.style.display = 'block';
+                    photoPlaceholder.style.display = 'none';
+                };
+                reader.readAsDataURL(fotoFile);
+            } else {
+                modalFoto.style.display = 'none';
+                photoPlaceholder.style.display = 'flex';
+            }
+
+            // Manejar la firma
+            const modalFirmaImagen = document.getElementById('modalFirmaImagen');
+            const modalFirmaTexto = document.getElementById('modalFirmaTexto');
+            const signaturePlaceholder = document.getElementById('signaturePlaceholder');
+            
+            if (firmaFile) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    modalFirmaImagen.src = e.target.result;
+                    modalFirmaImagen.style.display = 'block';
+                    modalFirmaTexto.style.display = 'none';
+                    signaturePlaceholder.style.display = 'none';
+                };
+                reader.readAsDataURL(firmaFile);
+            } else if (datos.firmaTexto) {
+                modalFirmaTexto.textContent = datos.firmaTexto;
+                modalFirmaTexto.style.display = 'block';
+                modalFirmaImagen.style.display = 'none';
+                signaturePlaceholder.style.display = 'none';
+            } else {
+                modalFirmaImagen.style.display = 'none';
+                modalFirmaTexto.style.display = 'none';
+                signaturePlaceholder.style.display = 'block';
+            }
 
             // Mostrar el modal
             modal.style.display = 'block';
