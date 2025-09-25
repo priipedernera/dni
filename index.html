@@ -1,814 +1,257 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analizador de DNI Argentino</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-
-        .header {
-            background: linear-gradient(45deg, #4CAF50, #45a049);
-            color: white;
-            text-align: center;
-            padding: 30px;
-        }
-
-        .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .header p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-        }
-
-        .form-container {
-            padding: 40px;
-        }
-
-        .form-section {
-            margin-bottom: 30px;
-        }
-
-        .section-title {
-            color: #333;
-            font-size: 1.3rem;
-            font-weight: bold;
-            margin-bottom: 15px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #4CAF50;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-row {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            color: #555;
-            font-weight: 600;
-        }
-
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-
-        .form-group input[type="file"] {
-            padding: 8px;
-            background: #f9f9f9;
-            border: 2px dashed #ddd;
-        }
-
-        .form-group small {
-            display: block;
-            margin-top: 5px;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #4CAF50;
-            box-shadow: 0 0 10px rgba(76, 175, 80, 0.2);
-        }
-
-        .btn-visualizar {
-            background: linear-gradient(45deg, #4CAF50, #45a049);
-            color: white;
-            padding: 15px 40px;
-            border: none;
-            border-radius: 50px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
-            display: block;
-            margin: 30px auto 0;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .btn-visualizar:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
-        }
-
-        .btn-visualizar:active {
-            transform: translateY(-1px);
-        }
-
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.8);
-            backdrop-filter: blur(5px);
-        }
-
-        .modal-content {
-            position: relative;
-            margin: 2% auto;
-            width: 90%;
-            max-width: 600px;
-            background: linear-gradient(145deg, #f0f8ff, #e6f3ff);
-            border-radius: 20px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
-            overflow: hidden;
-            animation: modalSlideIn 0.4s ease;
-        }
-
-        @keyframes modalSlideIn {
-            from {
-                transform: translateY(-100px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .close {
-            position: absolute;
-            top: 15px;
-            right: 25px;
-            font-size: 30px;
-            font-weight: bold;
-            cursor: pointer;
-            color: #666;
-            z-index: 1001;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255,255,255,0.8);
-            transition: all 0.3s ease;
-        }
-
-        .close:hover {
-            background: rgba(255,0,0,0.1);
-            color: #ff0000;
-            transform: scale(1.1);
-        }
-
-        .dni-card {
-            background: linear-gradient(135deg, #74b9ff, #0984e3);
-            color: white;
-            padding: 30px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .dni-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
-            animation: shine 3s infinite;
-        }
-
-        @keyframes shine {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .dni-header {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-
-        .dni-title {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 5px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .dni-subtitle {
-            font-size: 0.9rem;
-            opacity: 0.9;
-        }
-
-        .dni-body {
-            display: grid;
-            grid-template-columns: 150px 1fr;
-            grid-template-rows: auto auto;
-            gap: 20px;
-            grid-template-areas: 
-                "photo info"
-                "signature signature";
-        }
-
-        .dni-photo-section {
-            grid-area: photo;
-        }
-
-        .dni-info-section {
-            grid-area: info;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .dni-signature-section {
-            grid-area: signature;
-            margin-top: 10px;
-        }
-
-        .dni-photo-container {
-            width: 150px;
-            height: 200px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 8px;
-            overflow: hidden;
-            position: relative;
-            background: rgba(255,255,255,0.1);
-        }
-
-        .dni-photo-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .photo-placeholder {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: rgba(255,255,255,0.7);
-            font-size: 0.8rem;
-            text-align: center;
-            line-height: 1.2;
-        }
-
-        .signature-container {
-            background: rgba(255,255,255,0.2);
-            border-radius: 8px;
-            padding: 15px;
-            min-height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-
-        .signature-container img {
-            max-height: 50px;
-            max-width: 100%;
-            object-fit: contain;
-        }
-
-        .signature-text {
-            font-family: cursive;
-            font-size: 1.2rem;
-            color: white;
-            text-align: center;
-        }
-
-        .signature-placeholder {
-            color: rgba(255,255,255,0.6);
-            font-style: italic;
-            text-align: center;
-        }
-
-        .dni-section h3 {
-            color: #ffeb3b;
-            font-size: 1.1rem;
-            margin-bottom: 10px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-        }
-
-        .dni-field {
-            margin-bottom: 8px;
-            font-size: 0.9rem;
-        }
-
-        .dni-field strong {
-            color: #fff;
-        }
-
-        .dni-number {
-            font-size: 2rem;
-            font-weight: bold;
-            text-align: center;
-            background: rgba(255,255,255,0.2);
-            padding: 15px;
-            border-radius: 10px;
-            margin: 20px 0;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-            grid-column: 1 / -1;
-        }
-
-        @media (max-width: 768px) {
-            .form-row {
-                flex-direction: column;
-            }
-            
-            .dni-body {
-                grid-template-columns: 1fr;
-                grid-template-areas: 
-                    "photo"
-                    "info"
-                    "signature";
-            }
-            
-            .dni-photo-container {
-                margin: 0 auto;
-            }
-            
-            .modal-content {
-                width: 95%;
-                margin: 5% auto;
-            }
-            
-            .header h1 {
-                font-size: 2rem;
-            }
-        }
-
-        .required {
-            color: #ff4444;
-        }
-
-        .argentina-flag {
-            background: linear-gradient(to bottom, #74acdf 33%, white 33%, white 66%, #74acdf 66%);
-            height: 10px;
-            width: 100%;
-            margin-bottom: 20px;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DNI Simple - Estudiante</title>
+  <style>
+    
+    body { font-family: Arial, sans-serif; background:#f7f7f7; padding:20px; }
+    .box { max-width:720px; margin:0 auto; background:white; padding:16px; border-radius:6px; box-shadow:0 2px 6px rgba(0,0,0,0.08); }
+    h1 { font-size:18px; margin-bottom:8px; }
+    label { display:block; margin-top:10px; font-size:13px; }
+    input[type="text"], input[type="date"], input[type="file"], select { width:100%; padding:8px; margin-top:4px; box-sizing:border-box; }
+    .row { display:flex; gap:10px; }
+    .col { flex:1; }
+    button { margin-top:12px; padding:10px 14px; cursor:pointer; }
+    .dni-card { margin-top:18px; padding:12px; border:1px solid #ddd; border-radius:6px; background:#fcfcfc; }
+    .dni-title { font-weight:bold; margin-bottom:6px; }
+    .photo { width:120px; height:150px; background:#eee; display:flex; align-items:center; justify-content:center; color:#777; font-size:12px; border:1px solid #ddd; }
+    .flex { display:flex; gap:12px; align-items:flex-start; }
+    .small { font-size:13px; color:#555; }
+    .sig { min-height:40px; display:flex; align-items:center; justify-content:center; border:1px solid #ddd; background:#fafafa; font-family:cursive; }
+    /* móvil */
+    @media (max-width:600px){ .row{flex-direction:column} .flex{flex-direction:column} .photo{width:100%; height:200px} }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🇦🇷 Analizador de DNI Argentino</h1>
-            <p>Ingresa los datos del Documento Nacional de Identidad</p>
+  <div class="box">
+    <h1>Documento Nacional de Identidad - República Argentina</h1>
+
+    
+    <form id="formDNI">
+      <div class="row">
+        <div class="col">
+          <label>Nombre y Apellido</label>
+          <input type="text" id="nombre" value="Juan Pérez" required>
+        </div>
+        <div class="col">
+          <label>Sexo</label>
+          <select id="sexo" required>
+            <option value="Masculino">Masculino</option>
+            <option value="Femenino">Femenino</option>
+            <option value="No binario">No binario</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col">
+          <label>Número de Documento</label>
+          <input type="text" id="dniNumero" value="23.456.789" required>
+        </div>
+        <div style="width:90px;">
+          <label>Ejemplar</label>
+          <input type="text" id="ejemplar" value="A" maxlength="1">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col">
+          <label>Fecha de Nacimiento</label>
+          <input type="date" id="fechaNac" value="1990-04-15" required>
+        </div>
+        <div class="col">
+          <label>Lugar de Nacimiento</label>
+          <input type="text" id="lugarNac" value="Buenos Aires, Argentina">
+        </div>
+      </div>
+
+      <hr style="margin:12px 0">
+
+      <div class="row">
+        <div class="col">
+          <label>Fecha de Emisión</label>
+          <input type="date" id="fechaEm" value="2020-02-10" required>
+        </div>
+        <div class="col">
+          <label>Fecha de Vencimiento</label>
+          <input type="date" id="fechaVto" value="2030-02-10">
+        </div>
+      </div>
+
+      <label>Número de Trámite</label>
+      <input type="text" id="numTramite" value="1234 5678 9012">
+
+      <label style="margin-top:12px">Foto del titular (opcional)</label>
+      <input type="file" id="foto" accept="image/*">
+
+      <label style="margin-top:8px">Firma (imagen opcional)</label>
+      <input type="file" id="firma" accept="image/*">
+
+      <button type="submit">Visualizar documento</button>
+    </form>
+
+    
+    <div id="preview" class="dni-card" style="display:none;">
+      <div class="dni-title">Documento Nacional de Identidad</div>
+      <div style="font-size:14px; color:#333; margin-bottom:8px;"><strong>REPÚBLICA ARGENTINA</strong></div>
+
+      <div class="flex">
+        <div>
+          <div id="photoBox" class="photo">Foto del titular</div>
         </div>
 
-        <div class="form-container">
-            <form id="dniForm">
-                <div class="form-section">
-                    <h2 class="section-title"> Datos Personales</h2>
-                    
-                    <div class="form-row">
-                        <div class="form-group" style="flex: 2;">
-                            <label for="nombre">Nombre <span class="required">*</span></label>
-                            <input type="text" id="nombre" name="nombre" required>
-                        </div>
-                        <div class="form-group" style="flex: 2;">
-                            <label for="apellido">Apellido <span class="required">*</span></label>
-                            <input type="text" id="apellido" name="apellido" required>
-                        </div>
-                        <div class="form-group" style="flex: 1;">
-                            <label for="sexo">Sexo <span class="required">*</span></label>
-                            <select id="sexo" name="sexo" required>
-                                <option value="">Seleccionar</option>
-                                <option value="M">Masculino</option>
-                                <option value="F">Femenino</option>
-                                <option value="X">No binario</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group" style="flex: 2;">
-                            <label for="numeroDocumento">Número de Documento <span class="required">*</span></label>
-                            <input type="text" id="numeroDocumento" name="numeroDocumento" placeholder="ej: 23.456.789" required>
-                        </div>
-                        <div class="form-group" style="flex: 1;">
-                            <label for="ejemplar">Ejemplar</label>
-                            <input type="text" id="ejemplar" name="ejemplar" placeholder="ej: A" maxlength="1">
-                        </div>
-                        <div class="form-group" style="flex: 2;">
-                            <label for="fechaNacimiento">Fecha de Nacimiento <span class="required">*</span></label>
-                            <input type="date" id="fechaNacimiento" name="fechaNacimiento" required>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="lugarNacimiento">Lugar de Nacimiento</label>
-                        <input type="text" id="lugarNacimiento" name="lugarNacimiento" placeholder="ej: Buenos Aires, Argentina">
-                    </div>
-                </div>
-
-                <div class="form-section">
-                    <h2 class="section-title"> Datos de Emisión</h2>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="fechaEmision">Fecha de Emisión <span class="required">*</span></label>
-                            <input type="date" id="fechaEmision" name="fechaEmision" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="fechaVencimiento">Fecha de Vencimiento</label>
-                            <input type="date" id="fechaVencimiento" name="fechaVencimiento">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="numeroTramite">Número de Trámite</label>
-                        <input type="text" id="numeroTramite" name="numeroTramite" placeholder="ej: 1234 5678 9012">
-                    </div>
-                </div>
-
-                <div class="form-section">
-                    <h2 class="section-title"> Datos Adicionales</h2>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="nacionalidad">Nacionalidad</label>
-                            <input type="text" id="nacionalidad" name="nacionalidad" value="Argentina">
-                        </div>
-                        <div class="form-group">
-                            <label for="estadoCivil">Estado Civil</label>
-                            <select id="estadoCivil" name="estadoCivil">
-                                <option value="">Seleccionar</option>
-                                <option value="Soltero/a">Soltero/a</option>
-                                <option value="Casado/a">Casado/a</option>
-                                <option value="Divorciado/a">Divorciado/a</option>
-                                <option value="Viudo/a">Viudo/a</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-section">
-                    <h2 class="section-title"> Identificación</h2>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="foto">Fotografía (150x200px)</label>
-                            <input type="file" id="foto" name="foto" accept="image/*">
-                            <small style="color: #666; font-size: 0.85rem;">Formato recomendado: JPG/PNG - 150x200 píxeles</small>
-                        </div>
-                        <div class="form-group">
-                            <label for="firma">Firma Digital</label>
-                            <input type="file" id="firma" name="firma" accept="image/*">
-                            <small style="color: #666; font-size: 0.85rem;">Imagen de la firma en formato JPG/PNG</small>
-                        </div>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="firmaTexto">Firma (Texto)</label>
-                            <input type="text" id="firmaTexto" name="firmaTexto" placeholder="Nombre y apellido como aparece en la firma" style="font-family: cursive;">
-                        </div>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn-visualizar"> Visualizar DNI</button>
-            </form>
+        <div style="flex:1;">
+          <div><strong>Nombre y Apellido:</strong> <span id="outNombre" class="small"></span></div>
+          <div><strong>Sexo:</strong> <span id="outSexo" class="small"></span></div>
+          <div><strong>Número de Documento:</strong> <span id="outDNI" class="small"></span></div>
+          <div><strong>Ejemplar:</strong> <span id="outEjemplar" class="small"></span></div>
+          <div><strong>Fecha de Nacimiento:</strong> <span id="outFNac" class="small"></span></div>
+          <div><strong>Lugar de Nacimiento:</strong> <span id="outLugar" class="small"></span></div>
+          <div style="margin-top:8px;"><strong>Fecha de Emisión:</strong> <span id="outFEm" class="small"></span></div>
+          <div><strong>Fecha de Vencimiento:</strong> <span id="outFVto" class="small"></span></div>
+          <div><strong>Número de Trámite:</strong> <span id="outTramite" class="small"></span></div>
         </div>
+      </div>
+
+      <div style="margin-top:12px;">
+        <div><strong>Firma:</strong></div>
+        <div id="signature" class="sig">Firma del titular</div>
+      </div>
+
+      <div style="text-align:center; margin-top:10px; font-size:12px; color:#666;">
+        Documento Nacional de Identidad - República Argentina
+      </div>
     </div>
+  </div>
 
-    <!-- Modal -->
-    <div id="dniModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <div class="argentina-flag"></div>
-            <div class="dni-card">
-                <div class="dni-header">
-                    <div class="dni-title">DOCUMENTO NACIONAL DE IDENTIDAD</div>
-                    <div class="dni-subtitle">REPÚBLICA ARGENTINA</div>
-                </div>
-                
-                <div class="dni-number" id="modalNumeroDocumento">
-                    <!-- Número de documento se insertará aquí -->
-                </div>
-                
-                <div class="dni-body">
-                    <div class="dni-photo-section">
-                        <div class="dni-photo-container">
-                            <img id="modalFoto" src="" alt="Fotografía" style="display: none;">
-                            <div id="photoPlaceholder" class="photo-placeholder">
-                                📷<br>FOTO<br>150x200
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="dni-info-section">
-                        <div class="dni-section">
-                            <h3>👤 DATOS PERSONALES</h3>
-                            <div class="dni-field">
-                                <strong>Nombre:</strong> <span id="modalNombre"></span>
-                            </div>
-                            <div class="dni-field">
-                                <strong>Apellido:</strong> <span id="modalApellido"></span>
-                            </div>
-                            <div class="dni-field">
-                                <strong>Sexo:</strong> <span id="modalSexo"></span>
-                            </div>
-                            <div class="dni-field">
-                                <strong>F. Nacimiento:</strong> <span id="modalFechaNacimiento"></span>
-                            </div>
-                            <div class="dni-field">
-                                <strong>Nacionalidad:</strong> <span id="modalNacionalidad"></span>
-                            </div>
-                        </div>
-                        
-                        <div class="dni-section">
-                            <h3>📋 DATOS DEL DOCUMENTO</h3>
-                            <div class="dni-field">
-                                <strong>Ejemplar:</strong> <span id="modalEjemplar"></span>
-                            </div>
-                            <div class="dni-field">
-                                <strong>F. Emisión:</strong> <span id="modalFechaEmision"></span>
-                            </div>
-                            <div class="dni-field">
-                                <strong>F. Vencimiento:</strong> <span id="modalFechaVencimiento"></span>
-                            </div>
-                            <div class="dni-field">
-                                <strong>Nº Trámite:</strong> <span id="modalNumeroTramite"></span>
-                            </div>
-                            <div class="dni-field">
-                                <strong>Lugar Nac.:</strong> <span id="modalLugarNacimiento"></span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="dni-signature-section">
-                        <h3>✍️ FIRMA</h3>
-                        <div class="signature-container">
-                            <img id="modalFirmaImagen" src="" alt="Firma" style="display: none;">
-                            <div id="modalFirmaTexto" class="signature-text"></div>
-                            <div id="signaturePlaceholder" class="signature-placeholder">
-                                ✍️ Firma del titular
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+  <script>
+    // JS 
+    const form = document.getElementById('formDNI');
+    const preview = document.getElementById('preview');
 
-    <script>
-        // Referencias a elementos del DOM
-        const form = document.getElementById('dniForm');
-        const modal = document.getElementById('dniModal');
-        const closeModal = document.querySelector('.close');
+   
+    const outNombre = document.getElementById('outNombre');
+    const outSexo = document.getElementById('outSexo');
+    const outDNI = document.getElementById('outDNI');
+    const outEjemplar = document.getElementById('outEjemplar');
+    const outFNac = document.getElementById('outFNac');
+    const outLugar = document.getElementById('outLugar');
+    const outFEm = document.getElementById('outFEm');
+    const outFVto = document.getElementById('outFVto');
+    const outTramite = document.getElementById('outTramite');
+    const photoBox = document.getElementById('photoBox');
+    const signatureBox = document.getElementById('signature');
 
-        // Función para formatear fecha
-        function formatearFecha(fecha) {
-            if (!fecha) return 'No especificada';
-            const fechaObj = new Date(fecha);
-            return fechaObj.toLocaleDateString('es-AR', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
-            });
-        }
+   
+    const fotoInput = document.getElementById('foto');
+    const firmaInput = document.getElementById('firma');
+    let fotoData = null;
+    let firmaData = null;
 
-        // Función para formatear sexo
-        function formatearSexo(sexo) {
-            const sexos = {
-                'M': 'Masculino',
-                'F': 'Femenino',
-                'X': 'No binario'
-            };
-            return sexos[sexo] || sexo;
-        }
+    fotoInput.addEventListener('change', function(e){
+      const f = e.target.files[0];
+      if (!f) return;
+      const reader = new FileReader();
+      reader.onload = function(ev){ fotoData = ev.target.result; };
+      reader.readAsDataURL(f);
+    });
 
-        // Función para validar y formatear número de documento
-        function formatearNumeroDocumento(numero) {
-            // Remover puntos y espacios existentes
-            const numeroLimpio = numero.replace(/[^\d]/g, '');
-            
-            // Formatear con puntos
-            if (numeroLimpio.length >= 7) {
-                return numeroLimpio.replace(/(\d{2})(\d{3})(\d{3})/, '$1.$2.$3');
-            }
-            return numeroLimpio;
-        }
+    firmaInput.addEventListener('change', function(e){
+      const f = e.target.files[0];
+      if (!f) return;
+      const reader = new FileReader();
+      reader.onload = function(ev){ firmaData = ev.target.result; };
+      reader.readAsDataURL(f);
+    });
 
-        // Validación y formateo en tiempo real del número de documento
-        document.getElementById('numeroDocumento').addEventListener('input', function(e) {
-            const valor = e.target.value;
-            const valorFormateado = formatearNumeroDocumento(valor);
-            if (valorFormateado !== valor) {
-                e.target.value = valorFormateado;
-            }
-        });
+    
+    function formatDni(s){
+      if (!s) return '';
+      let only = s.replace(/\D/g,''); 
+      if (only.length <= 2) return only;
+      if (only.length <= 5) return only.replace(/(\d{2})(\d+)/, '$1.$2');
+      if (only.length <= 8) return only.replace(/(\d{2})(\d{3})(\d+)/, '$1.$2.$3');
+      // si es más largo, poner puntos iguales
+      return only.replace(/(\d{2})(\d{3})(\d{3})(\d+)/, '$1.$2.$3.$4');
+    }
 
-        // Función para cargar datos de ejemplo
-        function cargarDatosEjemplo() {
-            document.getElementById('nombre').value = 'Juan';
-            document.getElementById('apellido').value = 'Pérez';
-            document.getElementById('sexo').value = 'M';
-            document.getElementById('numeroDocumento').value = '23.456.789';
-            document.getElementById('ejemplar').value = 'A';
-            document.getElementById('fechaNacimiento').value = '1990-04-15';
-            document.getElementById('lugarNacimiento').value = 'Buenos Aires, Argentina';
-            document.getElementById('fechaEmision').value = '2020-02-10';
-            document.getElementById('fechaVencimiento').value = '2030-02-10';
-            document.getElementById('numeroTramite').value = '1234 5678 9012';
-            document.getElementById('nacionalidad').value = 'Argentina';
-            document.getElementById('estadoCivil').value = 'Soltero/a';
-            document.getElementById('firmaTexto').value = 'Juan Pérez';
-        }
+  
+    function mostrarFecha(val){
+      if (!val) return 'No especificada';
+      const d = new Date(val);
+      if (isNaN(d)) return val; // si el input entró mal
+      const dd = String(d.getDate()).padStart(2, '0');
+      const mm = String(d.getMonth()+1).padStart(2, '0');
+      const yyyy = d.getFullYear();
+      return dd + '/' + mm + '/' + yyyy;
+    }
 
-        // Variables para almacenar las imágenes cargadas
-        let fotoFile = null;
-        let firmaFile = null;
+   
+    form.addEventListener('submit', function(ev){
+      ev.preventDefault();
+    
+      const nombre = document.getElementById('nombre').value.trim();
+      const sexo = document.getElementById('sexo').value;
+      const dniRaw = document.getElementById('dniNumero').value.trim();
+      const ejemplar = document.getElementById('ejemplar').value.trim() || 'N/A';
+      const fechaNac = document.getElementById('fechaNac').value;
+      const lugarNac = document.getElementById('lugarNac').value.trim() || 'No especificado';
+      const fechaEm = document.getElementById('fechaEm').value;
+      const fechaVto = document.getElementById('fechaVto').value;
+      const tramite = document.getElementById('numTramite').value.trim() || 'No especificado';
 
-        // Manejar carga de foto
-        document.getElementById('foto').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                fotoFile = file;
-                // Opcional: mostrar preview de la foto
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    console.log('Foto cargada correctamente');
-                };
-                reader.readAsDataURL(file);
-            }
-        });
+      // validaciones sencillas
+      if (!nombre || !dniRaw || !fechaNac || !fechaEm){
+        alert('Completa los campos obligatorios: Nombre, DNI, Fecha de Nacimiento y Fecha de Emisión.');
+        return;
+      }
 
-        // Manejar carga de firma
-        document.getElementById('firma').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                firmaFile = file;
-                // Opcional: mostrar preview de la firma
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    console.log('Firma cargada correctamente');
-                };
-                reader.readAsDataURL(file);
-            }
-        });
+      // llenar la tarjeta
+      outNombre.textContent = nombre;
+      outSexo.textContent = sexo;
+      outDNI.textContent = formatDni(dniRaw);
+      outEjemplar.textContent = ejemplar;
+      outFNac.textContent = mostrarFecha(fechaNac);
+      outLugar.textContent = lugarNac;
+      outFEm.textContent = mostrarFecha(fechaEm);
+      outFVto.textContent = mostrarFecha(fechaVto);
+      outTramite.textContent = tramite;
 
-        // Cargar datos de ejemplo al cargar la página
-        window.addEventListener('load', cargarDatosEjemplo);
+     
+      if (fotoData){
+        photoBox.style.backgroundImage = 'url(' + fotoData + ')';
+        photoBox.style.backgroundSize = 'cover';
+        photoBox.style.backgroundPosition = 'center';
+        photoBox.textContent = '';
+      } else {
+        photoBox.style.backgroundImage = '';
+        photoBox.textContent = 'Foto del titular';
+      }
 
-        // Manejar envío del formulario
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
+      
+      if (firmaData){
+        signatureBox.style.backgroundImage = 'url(' + firmaData + ')';
+        signatureBox.style.backgroundSize = 'contain';
+        signatureBox.style.backgroundRepeat = 'no-repeat';
+        signatureBox.style.backgroundPosition = 'center';
+        signatureBox.textContent = '';
+      } else {
+        signatureBox.style.backgroundImage = '';
+        signatureBox.textContent = nombre ? nombre : 'Firma del titular';
+      }
 
-            // Obtener valores del formulario
-            const formData = new FormData(form);
-            const datos = Object.fromEntries(formData.entries());
+      
+      preview.style.display = 'block';
+      
+      preview.scrollIntoView({behavior:'smooth'});
+    });
 
-            // Validar campos requeridos
-            const camposRequeridos = ['nombre', 'apellido', 'sexo', 'numeroDocumento', 'fechaNacimiento', 'fechaEmision'];
-            const camposFaltantes = camposRequeridos.filter(campo => !datos[campo]);
-
-            if (camposFaltantes.length > 0) {
-                alert('Por favor completa todos los campos obligatorios marcados con *');
-                return;
-            }
-
-            // Llenar el modal con los datos
-            document.getElementById('modalNumeroDocumento').textContent = datos.numeroDocumento;
-            document.getElementById('modalNombre').textContent = datos.nombre;
-            document.getElementById('modalApellido').textContent = datos.apellido;
-            document.getElementById('modalSexo').textContent = formatearSexo(datos.sexo);
-            document.getElementById('modalFechaNacimiento').textContent = formatearFecha(datos.fechaNacimiento);
-            document.getElementById('modalNacionalidad').textContent = datos.nacionalidad || 'Argentina';
-            document.getElementById('modalEjemplar').textContent = datos.ejemplar || 'N/A';
-            document.getElementById('modalFechaEmision').textContent = formatearFecha(datos.fechaEmision);
-            document.getElementById('modalFechaVencimiento').textContent = formatearFecha(datos.fechaVencimiento);
-            document.getElementById('modalNumeroTramite').textContent = datos.numeroTramite || 'No especificado';
-            document.getElementById('modalLugarNacimiento').textContent = datos.lugarNacimiento || 'No especificado';
-
-            // Manejar la foto
-            const modalFoto = document.getElementById('modalFoto');
-            const photoPlaceholder = document.getElementById('photoPlaceholder');
-            
-            if (fotoFile) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    modalFoto.src = e.target.result;
-                    modalFoto.style.display = 'block';
-                    photoPlaceholder.style.display = 'none';
-                };
-                reader.readAsDataURL(fotoFile);
-            } else {
-                modalFoto.style.display = 'none';
-                photoPlaceholder.style.display = 'flex';
-            }
-
-            // Manejar la firma
-            const modalFirmaImagen = document.getElementById('modalFirmaImagen');
-            const modalFirmaTexto = document.getElementById('modalFirmaTexto');
-            const signaturePlaceholder = document.getElementById('signaturePlaceholder');
-            
-            if (firmaFile) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    modalFirmaImagen.src = e.target.result;
-                    modalFirmaImagen.style.display = 'block';
-                    modalFirmaTexto.style.display = 'none';
-                    signaturePlaceholder.style.display = 'none';
-                };
-                reader.readAsDataURL(firmaFile);
-            } else if (datos.firmaTexto) {
-                modalFirmaTexto.textContent = datos.firmaTexto;
-                modalFirmaTexto.style.display = 'block';
-                modalFirmaImagen.style.display = 'none';
-                signaturePlaceholder.style.display = 'none';
-            } else {
-                modalFirmaImagen.style.display = 'none';
-                modalFirmaTexto.style.display = 'none';
-                signaturePlaceholder.style.display = 'block';
-            }
-
-            // Mostrar el modal
-            modal.style.display = 'block';
-            document.body.style.overflow = 'hidden';
-        });
-
-        // Cerrar modal
-        closeModal.addEventListener('click', function() {
-            modal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        });
-
-        // Cerrar modal al hacer clic fuera de él
-        window.addEventListener('click', function(e) {
-            if (e.target === modal) {
-                modal.style.display = 'none';
-                document.body.style.overflow = 'auto';
-            }
-        });
-
-        // Cerrar modal con tecla Escape
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && modal.style.display === 'block') {
-                modal.style.display = 'none';
-                document.body.style.overflow = 'auto';
-            }
-        });
-
-        // Calcular edad automáticamente
-        document.getElementById('fechaNacimiento').addEventListener('change', function(e) {
-            const fechaNacimiento = new Date(e.target.value);
-            const hoy = new Date();
-            const edad = hoy.getFullYear() - fechaNacimiento.getFullYear();
-            
-            // Opcional: mostrar edad calculada
-            console.log('Edad calculada:', edad, 'años');
-        });
-
-        // Validar que la fecha de vencimiento sea posterior a la emisión
-        document.getElementById('fechaVencimiento').addEventListener('change', function(e) {
-            const fechaEmision = document.getElementById('fechaEmision').value;
-            const fechaVencimiento = e.target.value;
-            
-            if (fechaEmision && fechaVencimiento && new Date(fechaVencimiento) <= new Date(fechaEmision)) {
-                alert('La fecha de vencimiento debe ser posterior a la fecha de emisión');
-                e.target.value = '';
-            }
-        });
-    </script>
+  
+    (function init(){
+      document.getElementById('sexo').value = 'Masculino';
+    })();
+  </script>
 </body>
 </html>
